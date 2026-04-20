@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(docker --version)",
+      "Bash(docker info *)",
+      "Bash(npx supabase *)",
+      "mcp__e16e0d78-4be2-4d85-a151-8175ca78d1de__list_projects",
+      "mcp__e16e0d78-4be2-4d85-a151-8175ca78d1de__list_tables",
+      "mcp__e16e0d78-4be2-4d85-a151-8175ca78d1de__apply_migration",
+      "mcp__e16e0d78-4be2-4d85-a151-8175ca78d1de__execute_sql",
+      "mcp__e16e0d78-4be2-4d85-a151-8175ca78d1de__get_project_url",
+      "mcp__e16e0d78-4be2-4d85-a151-8175ca78d1de__get_publishable_keys",
+      "mcp__e16e0d78-4be2-4d85-a151-8175ca78d1de__get_logs",
+      "Bash(npx vue-tsc *)",
+      "Bash(npm install *)",
+      "Bash(pnpm remove *)",
+      "Bash(pnpm add *)",
+      "Bash(npm remove *)"
+    ]
+  }
+}

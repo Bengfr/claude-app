@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../stores/auth'
 import { fetchWeightHistory, type WeightEntry } from '../lib/queries/weightHistory'
 import WeightProgressChart from '../components/charts/WeightProgressChart.vue'
 
 const auth   = useAuthStore()
+const route  = useRoute()
 const router = useRouter()
 
 // ── Profile form ───────────────────────────────────────────────────────
@@ -132,6 +133,7 @@ async function signOut() {
 }
 
 onMounted(loadWeightHistory)
+watch(() => route.name, (name) => { if (name === 'profile') loadWeightHistory() })
 </script>
 
 <template>

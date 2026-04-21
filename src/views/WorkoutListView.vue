@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { onMounted, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../stores/auth'
 import { fetchWorkoutFrequency, type DayCount } from '../lib/queries/workoutFrequency'
@@ -8,6 +8,7 @@ import SkeletonCard from '../components/SkeletonCard.vue'
 import WorkoutFrequencyChart from '../components/charts/WorkoutFrequencyChart.vue'
 
 const auth = useAuthStore()
+const route = useRoute()
 const router = useRouter()
 
 type SessionRow = { id: number; started_at: string; name: string | null }
@@ -96,6 +97,7 @@ function fmtDate(iso: string): string {
 }
 
 onMounted(load)
+watch(() => route.name, (name) => { if (name === 'workout') load() })
 </script>
 
 <template>

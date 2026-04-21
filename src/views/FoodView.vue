@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../stores/auth'
 import { MEALS, type MealType } from '../lib/meal'
@@ -17,6 +18,7 @@ type FoodRow = {
 }
 
 const auth = useAuthStore()
+const route = useRoute()
 const entries = ref<FoodRow[]>([])
 const loading = ref(true)
 const error = ref<string | null>(null)
@@ -77,6 +79,7 @@ async function remove(row: FoodRow) {
 }
 
 onMounted(load)
+watch(() => route.name, (name) => { if (name === 'food') load() })
 </script>
 
 <template>

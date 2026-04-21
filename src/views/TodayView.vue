@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { fetchTodayTotals, type DayTotals } from '../lib/queries/today'
 import { fetchWeeklyCalories, type DayCalories } from '../lib/queries/weeklyNutrition'
@@ -11,6 +12,7 @@ import WeeklyCalorieChart from '../components/charts/WeeklyCalorieChart.vue'
 import MacroDonutChart from '../components/charts/MacroDonutChart.vue'
 
 const auth = useAuthStore()
+const route = useRoute()
 const totals = ref<DayTotals>({ calories: 0, protein_g: 0, carbs_g: 0, fat_g: 0 })
 const loading = ref(true)
 const weeklyData = ref<DayCalories[]>([])
@@ -91,6 +93,7 @@ function fmtTime(iso: string): string {
 }
 
 onMounted(load)
+watch(() => route.name, (name) => { if (name === 'today') load() })
 </script>
 
 <template>

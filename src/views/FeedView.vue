@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { supabase } from '../lib/supabase'
 import type { RealtimeChannel } from '@supabase/supabase-js'
 import SkeletonCard from '../components/SkeletonCard.vue'
@@ -12,6 +13,7 @@ type FeedRow = {
   avatar_url?: string | null
 }
 
+const route = useRoute()
 const events = ref<FeedRow[]>([])
 const loading = ref(true)
 const avatarMap = ref<Map<string, string | null>>(new Map())
@@ -85,6 +87,13 @@ function relTime(iso: string): string {
 
 onMounted(() => { load(); subscribe() })
 onBeforeUnmount(() => { if (channel) supabase.removeChannel(channel) })
+watch(() => route.name, (name) => {
+  if (name === 'feed') {
+    if (channel) supabase.removeChannel(channel)
+    load()
+    subscribe()
+  }
+})
 </script>
 
 <template>

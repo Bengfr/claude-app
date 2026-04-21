@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { fetchTodayTotals, type DayTotals } from '../lib/queries/today'
@@ -92,8 +92,7 @@ function fmtTime(iso: string): string {
   return new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 }
 
-onMounted(load)
-watch(() => route.name, (name) => { if (name === 'today') load() })
+watch(() => route.name === 'today', (active) => { if (active) load() }, { immediate: true })
 </script>
 
 <template>

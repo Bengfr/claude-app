@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../stores/auth'
@@ -78,8 +78,7 @@ async function remove(row: FoodRow) {
   entries.value = entries.value.filter((x) => x.id !== row.id)
 }
 
-onMounted(load)
-watch(() => route.name, (name) => { if (name === 'food') load() })
+watch(() => route.name === 'food', (active) => { if (active) load() }, { immediate: true })
 </script>
 
 <template>

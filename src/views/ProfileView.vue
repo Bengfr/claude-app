@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref, watch } from 'vue'
+import { reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../stores/auth'
@@ -132,8 +132,7 @@ async function signOut() {
   router.replace({ name: 'login' })
 }
 
-onMounted(loadWeightHistory)
-watch(() => route.name, (name) => { if (name === 'profile') loadWeightHistory() })
+watch(() => route.name === 'profile', (active) => { if (active) loadWeightHistory() }, { immediate: true })
 </script>
 
 <template>

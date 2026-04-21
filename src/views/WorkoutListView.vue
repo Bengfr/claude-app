@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
+import { ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../stores/auth'
@@ -96,8 +96,7 @@ function fmtDate(iso: string): string {
     : d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })
 }
 
-onMounted(load)
-watch(() => route.name, (name) => { if (name === 'workout') load() })
+watch(() => route.name === 'workout', (active) => { if (active) load() }, { immediate: true })
 </script>
 
 <template>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { onBeforeUnmount, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { supabase } from '../lib/supabase'
 import type { RealtimeChannel } from '@supabase/supabase-js'
@@ -85,15 +85,10 @@ function relTime(iso: string): string {
   return new Date(iso).toLocaleDateString()
 }
 
-onMounted(() => { load(); subscribe() })
 onBeforeUnmount(() => { if (channel) supabase.removeChannel(channel) })
-watch(() => route.name, (name) => {
-  if (name === 'feed') {
-    if (channel) supabase.removeChannel(channel)
-    load()
-    subscribe()
-  }
-})
+watch(() => route.name === 'feed', (active) => {
+  if (active) { if (channel) supabase.removeChannel(channel); load(); subscribe() }
+}, { immediate: true })
 </script>
 
 <template>

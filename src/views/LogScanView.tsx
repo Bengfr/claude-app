@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { BrowserMultiFormatReader } from '@zxing/browser'
 import { fetchOffProduct, scaleByGrams, type OffProduct } from '../lib/off'
+import { saveToCatalog } from '../lib/foodCatalog'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { MEALS, defaultMealForNow, type MealType } from '../lib/meal'
@@ -71,6 +72,7 @@ export default function LogScanView() {
     })
     setSaving(false)
     if (e) { setLookupError(e.message); return }
+    saveToCatalog(product.name, product.per100g)
     navigate('/food', { replace: true })
   }
 

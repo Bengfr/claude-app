@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { MEALS, type MealType } from '../lib/meal'
 import SkeletonCard from '../components/SkeletonCard'
+import FrequentFoods from '../components/FrequentFoods'
 
 type FoodRow = {
   id: number; item_name: string | null;
@@ -71,6 +72,8 @@ export default function FoodView() {
   return (
     <div>
       {error && <div className="alert alert-danger" style={{ marginBottom: '.75rem' }}>{error}</div>}
+
+      <FrequentFoods onLogged={load} />
 
       {/* Quick add tiles */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 }}>

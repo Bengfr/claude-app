@@ -23,7 +23,7 @@ export default function CalorieRing({ cal, targetCal }: Props) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 18, marginBottom: 22 }}>
       <div style={{ position: 'relative', width: 152, height: 152, flexShrink: 0 }}>
-        <svg width="152" height="152" viewBox="0 0 152 152" style={{ transform: 'rotate(-90deg)' }}>
+        <svg width="152" height="152" viewBox="0 0 152 152" style={{ transform: 'rotate(-90deg)', overflow: 'visible' }}>
           <circle cx="76" cy="76" r={R} fill="none" stroke="var(--surface-3)" strokeWidth="14" />
           <circle
             cx="76" cy="76" r={R}

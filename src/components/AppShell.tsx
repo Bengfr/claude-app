@@ -10,6 +10,7 @@ export default function AppShell() {
     '/food/scan': 'Scan Barcode',
     '/workout': 'Workouts',
     '/workout/exercises': 'My Exercises',
+    '/dashboard': 'Dashboard',
     '/feed': 'Feed',
     '/profile': 'Profile',
   }
@@ -47,6 +48,10 @@ export default function AppShell() {
         <NavLink to="/workout" className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}>
           <i className="bi bi-lightning-charge-fill" />
           <span>Workout</span>
+        </NavLink>
+        <NavLink to="/dashboard" className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}>
+          <i className="bi bi-calendar3" />
+          <span>Streak</span>
         </NavLink>
         <NavLink to="/feed" className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}>
           <i className="bi bi-people-fill" />

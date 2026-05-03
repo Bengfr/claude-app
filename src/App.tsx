@@ -14,6 +14,7 @@ import WorkoutPlanView from './views/WorkoutPlanView'
 import WorkoutExercisesView from './views/WorkoutExercisesView'
 import FeedView from './views/FeedView'
 import ProfileView from './views/ProfileView'
+import DashboardView from './views/DashboardView'
 
 function Guard({ children }: { children: React.ReactNode }) {
   const { session, profile, ready } = useAuth()
@@ -54,6 +55,7 @@ function AppRoutes() {
         <Route path="workout/:id" element={<WorkoutSessionView />} />
         <Route path="workout/plan/:id" element={<WorkoutPlanView />} />
         <Route path="workout/exercises" element={<WorkoutExercisesView />} />
+        <Route path="dashboard" element={<DashboardView />} />
         <Route path="feed" element={<FeedView />} />
         <Route path="profile" element={<ProfileView />} />
       </Route>

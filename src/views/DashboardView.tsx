@@ -34,12 +34,16 @@ function buildCalendar(month: Date): (string | null)[] {
   return cells
 }
 
-function calcStreak(workoutDays: Set<string>, restDays: Set<string>): { count: number; workouts: number; rest: number } {
+function calcStreak(workoutDays: Set<string>, restDays: Set<string>, from: Date): { count: number; workouts: number; rest: number } {
+  const fromStr = toDateStr(from)
   const today = toDateStr(new Date())
   let count = 0, workouts = 0, rest = 0
-  const d = new Date()
+  const d = new Date(from)
 
-  if (!workoutDays.has(today) && !restDays.has(today)) d.setDate(d.getDate() - 1)
+  // For the current month: if today has no activity yet, start from yesterday
+  if (fromStr === today && !workoutDays.has(today) && !restDays.has(today)) {
+    d.setDate(d.getDate() - 1)
+  }
 
   for (let i = 0; i < 365; i++) {
     const s = toDateStr(d)
@@ -73,8 +77,6 @@ export default function DashboardView() {
   const [loading, setLoading] = useState(true)
   const [selected, setSelected] = useState<string | null>(null)
 
-  const today = toDateStr(new Date())
-
   useEffect(() => {
     if (!session) return
     setLoading(true)
@@ -91,11 +93,13 @@ export default function DashboardView() {
       })
   }, [session])
 
+  const todayStr = toDateStr(new Date())
+
   function getStatus(dateStr: string): DayStatus {
-    if (dateStr > today) return 'future'
+    if (dateStr > todayStr) return 'future'
     if (workoutDays.has(dateStr)) return 'active'
     if (restDays.has(dateStr)) return 'rest'
-    if (dateStr === today) return 'today'
+    if (dateStr === todayStr) return 'today'
     return 'skip'
   }
 
@@ -124,7 +128,11 @@ export default function DashboardView() {
   }
 
   const cells = buildCalendar(month)
-  const streak = calcStreak(workoutDays, restDays)
+  const today = new Date()
+  const isCurrentMonth = month.getFullYear() === today.getFullYear() && month.getMonth() === today.getMonth()
+  // Streak reference: today if current month, else last day of displayed month
+  const streakRef = isCurrentMonth ? today : new Date(month.getFullYear(), month.getMonth() + 1, 0)
+  const streak = calcStreak(workoutDays, restDays, streakRef)
   const stats = monthStats(workoutDays, restDays, month)
   const streakEffort = streak.count > 0 ? Math.round((streak.workouts / streak.count) * 100) : 0
   const monthEffort = (stats.active + stats.rest) > 0 ? Math.round((stats.active / (stats.active + stats.rest)) * 100) : 0
@@ -146,7 +154,9 @@ export default function DashboardView() {
               <div className="num" style={{ fontSize: 28, fontWeight: 800, color: 'var(--text)', lineHeight: 1 }}>
                 {loading ? '—' : streak.count}
               </div>
-              <div style={{ fontSize: 11, color: 'var(--text-2)', fontWeight: 600, letterSpacing: '.05em' }}>DAY STREAK</div>
+              <div style={{ fontSize: 11, color: 'var(--text-2)', fontWeight: 600, letterSpacing: '.05em' }}>
+                {isCurrentMonth ? 'DAY STREAK' : `STREAK END OF ${month.toLocaleDateString(undefined, { month: 'short' }).toUpperCase()}`}
+              </div>
             </div>
           </div>
           <div style={{ textAlign: 'right' }}>
@@ -177,7 +187,9 @@ export default function DashboardView() {
 
       {/* This month breakdown */}
       <div className="card fade-up" style={{ padding: '1rem', marginBottom: '.75rem', animationDelay: '.04s' }}>
-        <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-2)', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 10 }}>This month</div>
+        <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-2)', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 10 }}>
+          {month.toLocaleDateString(undefined, { month: 'long' })}
+        </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 6 }}>
           {[
             { icon: 'bi-lightning-charge-fill', val: stats.active, label: 'Workouts', color: 'var(--accent)' },

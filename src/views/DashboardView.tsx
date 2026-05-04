@@ -34,20 +34,20 @@ function buildCalendar(month: Date): (string | null)[] {
   return cells
 }
 
-function calcStreak(workoutDays: Set<string>, restDays: Set<string>): number {
+function calcStreak(workoutDays: Set<string>, restDays: Set<string>): { count: number; workouts: number; rest: number } {
   const today = toDateStr(new Date())
-  let streak = 0
+  let count = 0, workouts = 0, rest = 0
   const d = new Date()
 
-  // If today already has activity, count it; otherwise start from yesterday
   if (!workoutDays.has(today) && !restDays.has(today)) d.setDate(d.getDate() - 1)
 
   for (let i = 0; i < 365; i++) {
     const s = toDateStr(d)
-    if (workoutDays.has(s) || restDays.has(s)) { streak++; d.setDate(d.getDate() - 1) }
+    if (workoutDays.has(s)) { count++; workouts++; d.setDate(d.getDate() - 1) }
+    else if (restDays.has(s)) { count++; rest++; d.setDate(d.getDate() - 1) }
     else break
   }
-  return streak
+  return { count, workouts, rest }
 }
 
 function monthStats(workoutDays: Set<string>, restDays: Set<string>, month: Date) {
@@ -126,6 +126,8 @@ export default function DashboardView() {
   const cells = buildCalendar(month)
   const streak = calcStreak(workoutDays, restDays)
   const stats = monthStats(workoutDays, restDays, month)
+  const streakEffort = streak.count > 0 ? Math.round((streak.workouts / streak.count) * 100) : 0
+  const monthEffort = (stats.active + stats.rest) > 0 ? Math.round((stats.active / (stats.active + stats.rest)) * 100) : 0
   const monthLabel = month.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })
   const isFutureMonth = month.getFullYear() > new Date().getFullYear() ||
     (month.getFullYear() === new Date().getFullYear() && month.getMonth() >= new Date().getMonth())
@@ -135,24 +137,67 @@ export default function DashboardView() {
 
   return (
     <div>
-      {/* Streak + stats */}
+      {/* Streak card */}
       <div className="card fade-up" style={{ padding: '1.1rem', marginBottom: '.75rem' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 8 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <i className="bi bi-fire" style={{ fontSize: 22, color: 'var(--orange)' }} />
+            <div>
+              <div className="num" style={{ fontSize: 28, fontWeight: 800, color: 'var(--text)', lineHeight: 1 }}>
+                {loading ? '—' : streak.count}
+              </div>
+              <div style={{ fontSize: 11, color: 'var(--text-2)', fontWeight: 600, letterSpacing: '.05em' }}>DAY STREAK</div>
+            </div>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <div className="num" style={{ fontSize: 22, fontWeight: 800, color: streakEffort >= 50 ? 'var(--accent)' : streakEffort > 0 ? '#818CF8' : 'var(--muted)', lineHeight: 1 }}>
+              {loading ? '—' : `${streakEffort}%`}
+            </div>
+            <div style={{ fontSize: 11, color: 'var(--text-2)', fontWeight: 600, letterSpacing: '.05em' }}>EFFORT</div>
+          </div>
+        </div>
+
+        {/* Composition bar */}
+        {!loading && streak.count > 0 && (
+          <>
+            <div style={{ display: 'flex', height: 7, borderRadius: 4, overflow: 'hidden', background: 'var(--surface-3)', marginBottom: 8 }}>
+              <div style={{ width: `${streakEffort}%`, background: 'var(--accent)', transition: 'width .6s ease' }} />
+              <div style={{ width: `${100 - streakEffort}%`, background: '#818CF8', transition: 'width .6s ease' }} />
+            </div>
+            <div style={{ display: 'flex', gap: 14, fontSize: 12, color: 'var(--text-2)' }}>
+              <span><span style={{ color: 'var(--accent)', fontWeight: 700 }}>{streak.workouts}</span> workout{streak.workouts !== 1 ? 's' : ''}</span>
+              <span><span style={{ color: '#818CF8', fontWeight: 700 }}>{streak.rest}</span> rest day{streak.rest !== 1 ? 's' : ''}</span>
+            </div>
+          </>
+        )}
+        {!loading && streak.count === 0 && (
+          <div style={{ fontSize: 12, color: 'var(--muted)', fontStyle: 'italic' }}>No active streak — log a workout or mark a rest day to start one.</div>
+        )}
+      </div>
+
+      {/* This month breakdown */}
+      <div className="card fade-up" style={{ padding: '1rem', marginBottom: '.75rem', animationDelay: '.04s' }}>
+        <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-2)', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 10 }}>This month</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 6 }}>
           {[
-            { icon: 'bi-fire', val: streak, label: 'Streak', color: 'var(--orange)' },
             { icon: 'bi-lightning-charge-fill', val: stats.active, label: 'Workouts', color: 'var(--accent)' },
-            { icon: 'bi-moon-stars-fill', val: stats.rest, label: 'Rest days', color: '#818CF8' },
+            { icon: 'bi-moon-stars-fill', val: stats.rest, label: 'Rest', color: '#818CF8' },
+            { icon: 'bi-x-circle-fill', val: stats.skips, label: 'Skips', color: 'var(--muted)' },
+            { icon: 'bi-bullseye', val: `${monthEffort}%`, label: 'Effort', color: monthEffort >= 50 ? 'var(--accent)' : monthEffort > 0 ? '#818CF8' : 'var(--muted)' },
           ].map(({ icon, val, label, color }) => (
-            <div key={label} style={{ textAlign: 'center', padding: '10px 6px', background: 'var(--surface-2)', borderRadius: 12 }}>
-              <i className={`bi ${icon}`} style={{ fontSize: 18, color }} />
-              <div className="num" style={{ fontSize: 22, fontWeight: 800, color: 'var(--text)', lineHeight: 1.1, marginTop: 4 }}>{loading ? '—' : val}</div>
-              <div style={{ fontSize: 10, color: 'var(--text-2)', fontWeight: 600, letterSpacing: '.05em', marginTop: 2 }}>{label.toUpperCase()}</div>
+            <div key={label} style={{ textAlign: 'center', padding: '10px 4px', background: 'var(--surface-2)', borderRadius: 12 }}>
+              <i className={`bi ${icon}`} style={{ fontSize: 16, color }} />
+              <div className="num" style={{ fontSize: 18, fontWeight: 800, color: 'var(--text)', lineHeight: 1.2, marginTop: 3 }}>
+                {loading ? '—' : val}
+              </div>
+              <div style={{ fontSize: 9, color: 'var(--text-2)', fontWeight: 600, letterSpacing: '.04em', marginTop: 1 }}>{label.toUpperCase()}</div>
             </div>
           ))}
         </div>
-        {stats.skips > 0 && (
-          <div style={{ marginTop: 8, textAlign: 'center', fontSize: 11, color: 'var(--muted)' }}>
-            {stats.skips} skip{stats.skips !== 1 ? 's' : ''} this month
+        {!loading && stats.rest > stats.active && (stats.active + stats.rest) > 4 && (
+          <div style={{ marginTop: 10, padding: '7px 10px', background: 'rgba(129,140,248,.1)', border: '1px solid rgba(129,140,248,.25)', borderRadius: 10, fontSize: 12, color: '#818CF8' }}>
+            <i className="bi bi-info-circle" style={{ marginRight: 6 }} />
+            More rest days than workouts this month
           </div>
         )}
       </div>
